@@ -78,7 +78,6 @@ BYPASS_KEYWORDS = [
     "증거 없음 명시",
 ]
 
-
 def resolve_transcript_path(stdin_json: dict) -> pathlib.Path | None:
     # Priority: explicit transcript_path → env var → session_id resolution
     tp = stdin_json.get("transcript_path")
@@ -234,3 +233,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+# --- debug stub: unconditional invocation breadcrumb (temporary) ---
