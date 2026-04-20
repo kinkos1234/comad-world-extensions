@@ -1,0 +1,20 @@
+{
+  "enabled": false,
+  "mode": "auto",
+  "threshold_5h_pct": 80,
+  "threshold_7d_pct": 90,
+  "current_5h_pct": 0,
+  "current_7d_pct": 0,
+  "fallback_model_5h": "claude-sonnet-4-6",
+  "fallback_model_7d": "claude-haiku-4-5-20251001",
+  "downgrade_agents": [
+    "comad-sleep",
+    "comad-ear",
+    "comad-evolve",
+    "comad-brain",
+    "comad-photo",
+    "Explore"
+  ],
+  "last_check": null,
+  "notes": "enabled=false = 완전 무영향. `mode=force-downgrade` = 배경 에이전트 즉시 블록(쿼터 상관없이). `mode=auto` = current_*_pct 기반이지만, **현재 current_*_pct를 자동으로 업데이트하는 로직이 없음** — comad-evolve 도입 후 Anthropic usage API 연동 예정. 그때까지 auto 모드는 사실상 '항상 통과'. 지금 당장 쿼터 방어를 원하면 enabled=true + mode=force-downgrade로 설정하거나, 수동으로 current_5h_pct를 99로 써넣기."
+}

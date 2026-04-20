@@ -1,0 +1,16 @@
+# Backup files produced by install.sh overwrites
+*.bak-*
+
+# Python bytecode / caches
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# Editor state
+.idea/
+.vscode/
+*.swp
