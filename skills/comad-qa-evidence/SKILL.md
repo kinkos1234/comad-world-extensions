@@ -120,6 +120,60 @@ cross-check:
 - `audit` — 커스텀 감사(매트릭스, fuzz 등)
 - `custom.<anything>` — 프로젝트 특유
 
+## L0~L5 QA 레벨 (Tier 3 확장, 선택적)
+
+체크 키에 `L<digit>_` 접두어를 쓰면 validator가 의미를 인식한다. 프로젝트
+타입에 따라 적용 불가한 레벨은 `"status": "N/A"` 로 선언 — FAIL로 치지
+않고 verdict=PASS에 지장 없음.
+
+| 키 | 의미 | 전제 |
+|----|------|------|
+| `L0_api_contract` | DTO/스키마 필드 매핑 검증 | API 있는 프로젝트 |
+| `L1_ui_render` | UI 렌더링 + 스크린샷 + viewport | 브라우저 필요 |
+| `L2_api_call` | curl 200 응답 + CORS 헤더 | HTTP API |
+| `L3_crud_roundtrip` | Write → Read → Compare | 영속 상태 있는 시스템 |
+| `L4_console_errors` | 브라우저 console.error == 0 | 브라우저 필요 |
+| `L5_field_mapping` | frontend type ↔ backend response 일치 | FE+BE 양쪽 있는 프로젝트 |
+
+**Status enum**: `PASS | FAIL | SKIP | N/A`
+- `N/A` = 이 프로젝트 타입에 해당 레벨 적용 안 됨. verdict=PASS와 호환.
+- `SKIP` = 이번 세션에서 일부러 건너뜀. verdict=PASS와 호환하지만 coverage
+  수치가 빠졌다는 기록이 남음.
+
+**L1 / L4 (브라우저 필요) 추가 필드:**
+- `tool`: "chrome-devtools-protocol | cdp | playwright | manual | ..."
+- `viewports`: ["1280x720", "375x812"] (L1만)
+- `console_errors`: 정수 (L4 PASS 시 반드시 0)
+
+**예시 (웹 프로젝트):**
+```json
+"checks": {
+  "L0_api_contract":   {"status": "PASS", "command": "python3 verify-dto.py"},
+  "L1_ui_render":      {"status": "PASS", "tool": "cdp",
+                        "viewports": ["1280x720","375x812"], "console_errors": 0},
+  "L2_api_call":       {"status": "PASS", "command": "curl -sI"},
+  "L3_crud_roundtrip": {"status": "PASS"},
+  "L4_console_errors": {"status": "PASS", "tool": "cdp", "console_errors": 0},
+  "L5_field_mapping":  {"status": "PASS", "details": "generated types match response"}
+}
+```
+
+**예시 (CLI 라이브러리):**
+```json
+"checks": {
+  "L0_api_contract":   {"status": "N/A"},
+  "L1_ui_render":      {"status": "N/A"},
+  "L2_api_call":       {"status": "N/A"},
+  "L3_crud_roundtrip": {"status": "N/A"},
+  "L4_console_errors": {"status": "N/A"},
+  "L5_field_mapping":  {"status": "N/A"},
+  "unit_tests":        {"status": "PASS", "passed": 47, "failed": 0, "total": 47}
+}
+```
+
+validator는 `L\d+_` 접두어를 쓰되 위 6개 외 이름을 쓰면 경고를 낸다 (오타
+방지). "L9_something" 같은 자유 이름은 `custom.*`로 표현 권장.
+
 ## PASS 조건 체크리스트
 
 `verdict: "PASS"`로 승격 전에 확인:

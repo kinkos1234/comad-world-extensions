@@ -21,7 +21,21 @@ import sys
 REQUIRED_TOP = ["schema_version", "generated_at", "project_root", "git_head",
                 "scope", "verdict", "checks"]
 ALLOWED_VERDICTS = {"PASS", "FAIL", "PARTIAL", "PENDING"}
-ALLOWED_CHECK_STATUSES = {"PASS", "FAIL", "SKIP"}
+# N/A — level not applicable to this project type (e.g., L1/L4 on a CLI-only
+# tool). Treated as pass-equivalent for verdict consistency.
+ALLOWED_CHECK_STATUSES = {"PASS", "FAIL", "SKIP", "N/A"}
+
+# L0~L5 QA levels (Tier 3 extension). Reserved prefixes; check names starting
+# with these imply the semantic below. Having them is optional — projects opt
+# in per level.
+QA_LEVELS = {
+    "L0_api_contract":    "DTO/schema field mapping",
+    "L1_ui_render":       "UI rendering (browser)",
+    "L2_api_call":        "HTTP 200 + CORS",
+    "L3_crud_roundtrip":  "Write → Read → Compare",
+    "L4_console_errors":  "Browser console.error == 0",
+    "L5_field_mapping":   "Frontend type ↔ backend field parity",
+}
 
 
 def git_root(start: pathlib.Path) -> pathlib.Path:
@@ -78,18 +92,29 @@ def validate(data: dict, path: pathlib.Path) -> tuple[list[str], list[str]]:
         if status not in ALLOWED_CHECK_STATUSES:
             errors.append(f"checks.{name}.status must be PASS|FAIL|SKIP (got {status!r})")
 
-        if name == "browser_qa":
+        if name == "browser_qa" or name == "L1_ui_render" or name == "L4_console_errors":
             if status == "PASS":
                 if ck.get("console_errors", 0) not in (0, None):
                     try:
                         if int(ck.get("console_errors", 0)) != 0:
-                            errors.append("checks.browser_qa.status=PASS requires console_errors=0")
+                            errors.append(f"checks.{name}.status=PASS requires console_errors=0")
                     except Exception:
-                        errors.append("checks.browser_qa.console_errors must be int")
+                        errors.append(f"checks.{name}.console_errors must be int")
                 if not ck.get("tool"):
-                    warnings.append("checks.browser_qa.tool not specified")
-                if not isinstance(ck.get("viewports"), list) or not ck.get("viewports"):
-                    warnings.append("checks.browser_qa.viewports missing or empty")
+                    warnings.append(f"checks.{name}.tool not specified")
+                if name in ("browser_qa", "L1_ui_render") and (
+                    not isinstance(ck.get("viewports"), list) or not ck.get("viewports")
+                ):
+                    warnings.append(f"checks.{name}.viewports missing or empty")
+
+        # L* prefix consistency — if the key starts with L<digit>_ ensure it
+        # maps to a known reserved name (warn only).
+        import re as _re
+        if _re.match(r"^L\d+_", name) and name not in QA_LEVELS:
+            warnings.append(
+                f"checks.{name}: L-prefix used but name not in reserved "
+                f"set {sorted(QA_LEVELS.keys())}"
+            )
 
         # tests-like shape sanity
         if "passed" in ck or "failed" in ck or "total" in ck:
@@ -99,7 +124,8 @@ def validate(data: dict, path: pathlib.Path) -> tuple[list[str], list[str]]:
             if t is not None and p + f != t:
                 errors.append(f"checks.{name}: passed({p})+failed({f}) != total({t})")
 
-    # verdict ↔ checks consistency
+    # verdict ↔ checks consistency. N/A is pass-equivalent (level doesn't apply
+    # to this project type); only FAIL blocks a PASS verdict.
     verdict = data.get("verdict")
     if verdict == "PASS":
         fail_checks = [n for n, ck in checks.items()

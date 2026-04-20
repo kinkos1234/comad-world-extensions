@@ -17,6 +17,7 @@ warn() { printf '\033[1;33m[!]\033[0m %s\n' "$*" >&2; }
 mkdir -p "$TARGET/hooks/pre-tool-use" "$TARGET/hooks/stop" \
          "$TARGET/skills/comad-learn/bin" "$TARGET/skills/comad-memory/bin" \
          "$TARGET/skills/comad-qa-evidence/bin" \
+         "$TARGET/skills/comad-second-opinion/bin" \
          "$TARGET/.comad/approvals" "$TARGET/.comad/pending" \
          "$TARGET/.comad/memory" "$TARGET/.comad/evolve"
 
@@ -67,6 +68,7 @@ for f in SKILL.md; do
   copy_file "$REPO_ROOT/skills/comad-learn/$f" "$TARGET/skills/comad-learn/$f"
   copy_file "$REPO_ROOT/skills/comad-memory/$f" "$TARGET/skills/comad-memory/$f"
   copy_file "$REPO_ROOT/skills/comad-qa-evidence/$f" "$TARGET/skills/comad-qa-evidence/$f"
+  copy_file "$REPO_ROOT/skills/comad-second-opinion/$f" "$TARGET/skills/comad-second-opinion/$f"
 done
 for f in validate-pending.py validate-feedback.py; do
   copy_file "$REPO_ROOT/skills/comad-learn/bin/$f" "$TARGET/skills/comad-learn/bin/$f"
@@ -77,6 +79,10 @@ done
 for f in init-qa-evidence.py validate-qa-evidence.py; do
   copy_file "$REPO_ROOT/skills/comad-qa-evidence/bin/$f" "$TARGET/skills/comad-qa-evidence/bin/$f"
   chmod +x "$TARGET/skills/comad-qa-evidence/bin/$f"
+done
+for f in validate-second-opinion.py; do
+  copy_file "$REPO_ROOT/skills/comad-second-opinion/bin/$f" "$TARGET/skills/comad-second-opinion/bin/$f"
+  chmod +x "$TARGET/skills/comad-second-opinion/bin/$f"
 done
 
 # --- config template (only if target doesn't exist — don't overwrite live state) ---
