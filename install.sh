@@ -31,7 +31,7 @@ copy_file() {
 }
 
 # --- hooks ---
-for f in destroy-gate.sh destroy-gate.py usage-gate.sh README.md; do
+for f in destroy-gate.sh destroy-gate.py usage-gate.sh no-env-commit.sh no-env-commit.py README.md; do
   copy_file "$REPO_ROOT/hooks/pre-tool-use/$f" "$TARGET/hooks/pre-tool-use/$f"
 done
 copy_file "$REPO_ROOT/hooks/stop/t6-capture.sh" "$TARGET/hooks/stop/t6-capture.sh"
@@ -39,6 +39,8 @@ copy_file "$REPO_ROOT/hooks/stop/t6-capture.sh" "$TARGET/hooks/stop/t6-capture.s
 chmod +x "$TARGET/hooks/pre-tool-use/destroy-gate.sh" \
          "$TARGET/hooks/pre-tool-use/destroy-gate.py" \
          "$TARGET/hooks/pre-tool-use/usage-gate.sh" \
+         "$TARGET/hooks/pre-tool-use/no-env-commit.sh" \
+         "$TARGET/hooks/pre-tool-use/no-env-commit.py" \
          "$TARGET/hooks/stop/t6-capture.sh"
 
 # --- skills ---
