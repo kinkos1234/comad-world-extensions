@@ -41,13 +41,17 @@ copy_file "$REPO_ROOT/hooks/stop/t6-capture.sh" "$TARGET/hooks/stop/t6-capture.s
          "$TARGET/hooks/stop/premature-completion-detector.sh" \
          "$TARGET/hooks/stop/premature-completion-detector.py" \
          "$TARGET/hooks/stop/numeric-claim-gate.sh" \
-         "$TARGET/hooks/stop/numeric-claim-gate.py"
+         "$TARGET/hooks/stop/numeric-claim-gate.py" \
+         "$TARGET/hooks/stop/inventory-gate.sh" \
+         "$TARGET/hooks/stop/inventory-gate.py"
 copy_file "$REPO_ROOT/hooks/stop/claim-done-gate.sh" "$TARGET/hooks/stop/claim-done-gate.sh"
 copy_file "$REPO_ROOT/hooks/stop/claim-done-gate.py" "$TARGET/hooks/stop/claim-done-gate.py"
 copy_file "$REPO_ROOT/hooks/stop/premature-completion-detector.sh" "$TARGET/hooks/stop/premature-completion-detector.sh"
 copy_file "$REPO_ROOT/hooks/stop/premature-completion-detector.py" "$TARGET/hooks/stop/premature-completion-detector.py"
 copy_file "$REPO_ROOT/hooks/stop/numeric-claim-gate.sh" "$TARGET/hooks/stop/numeric-claim-gate.sh"
 copy_file "$REPO_ROOT/hooks/stop/numeric-claim-gate.py" "$TARGET/hooks/stop/numeric-claim-gate.py"
+copy_file "$REPO_ROOT/hooks/stop/inventory-gate.sh" "$TARGET/hooks/stop/inventory-gate.sh"
+copy_file "$REPO_ROOT/hooks/stop/inventory-gate.py" "$TARGET/hooks/stop/inventory-gate.py"
 
 chmod +x "$TARGET/hooks/pre-tool-use/destroy-gate.sh" \
          "$TARGET/hooks/pre-tool-use/destroy-gate.py" \
