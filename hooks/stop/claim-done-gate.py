@@ -117,7 +117,17 @@ def find_last_user_idx(lines: list[str]) -> int:
 
 
 def collect_turn(lines: list[str], start_idx: int) -> tuple[str, list[str]]:
-    """Collect assistant text + Bash commands from lines after ``start_idx``."""
+    """Collect claim-text + Bash commands from lines after ``start_idx``.
+
+    Claim-text aggregates:
+      - assistant ``content[].text`` blocks (classic prose)
+      - assistant ``content[].tool_use.input.text`` (MCP reply tools like
+        discord/slack — where user-facing claims actually land in a tool-
+        centric workflow)
+
+    Bash commands capture assistant ``content[].tool_use.name == "Bash"``
+    ``input.command`` values, used for verification evidence.
+    """
     texts: list[str] = []
     bash_cmds: list[str] = []
     for line in lines[start_idx + 1 :]:
@@ -132,9 +142,17 @@ def collect_turn(lines: list[str], start_idx: int) -> tuple[str, list[str]]:
             ct = c.get("type")
             if ct == "text":
                 texts.append(c.get("text") or "")
-            elif ct == "tool_use" and c.get("name") == "Bash":
-                cmd = (c.get("input") or {}).get("command") or ""
-                bash_cmds.append(cmd)
+            elif ct == "tool_use":
+                name = c.get("name", "")
+                inp = c.get("input") or {}
+                if name == "Bash":
+                    bash_cmds.append(inp.get("command") or "")
+                # Scan `input.text` on any tool — most MCP reply-style tools
+                # carry their user-visible string in a `text` field. Bash uses
+                # `command` and Write uses `content`, so they don't collide.
+                maybe_text = inp.get("text")
+                if isinstance(maybe_text, str) and maybe_text:
+                    texts.append(maybe_text)
     return "\n".join(texts), bash_cmds
 
 

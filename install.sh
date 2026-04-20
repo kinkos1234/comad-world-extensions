@@ -37,9 +37,13 @@ for f in destroy-gate.sh destroy-gate.py usage-gate.sh no-env-commit.sh no-env-c
 done
 copy_file "$REPO_ROOT/hooks/stop/t6-capture.sh" "$TARGET/hooks/stop/t6-capture.sh" \
          "$TARGET/hooks/stop/claim-done-gate.sh" \
-         "$TARGET/hooks/stop/claim-done-gate.py"
+         "$TARGET/hooks/stop/claim-done-gate.py" \
+         "$TARGET/hooks/stop/premature-completion-detector.sh" \
+         "$TARGET/hooks/stop/premature-completion-detector.py"
 copy_file "$REPO_ROOT/hooks/stop/claim-done-gate.sh" "$TARGET/hooks/stop/claim-done-gate.sh"
 copy_file "$REPO_ROOT/hooks/stop/claim-done-gate.py" "$TARGET/hooks/stop/claim-done-gate.py"
+copy_file "$REPO_ROOT/hooks/stop/premature-completion-detector.sh" "$TARGET/hooks/stop/premature-completion-detector.sh"
+copy_file "$REPO_ROOT/hooks/stop/premature-completion-detector.py" "$TARGET/hooks/stop/premature-completion-detector.py"
 
 chmod +x "$TARGET/hooks/pre-tool-use/destroy-gate.sh" \
          "$TARGET/hooks/pre-tool-use/destroy-gate.py" \
