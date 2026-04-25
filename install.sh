@@ -18,6 +18,8 @@ mkdir -p "$TARGET/hooks/pre-tool-use" "$TARGET/hooks/stop" \
          "$TARGET/skills/comad-learn/bin" "$TARGET/skills/comad-memory/bin" \
          "$TARGET/skills/comad-qa-evidence/bin" \
          "$TARGET/skills/comad-second-opinion/bin" \
+         "$TARGET/skills/comad-parallel/scripts" \
+         "$TARGET/skills/comad-parallel/references" \
          "$TARGET/.comad/approvals" "$TARGET/.comad/pending" \
          "$TARGET/.comad/memory" "$TARGET/.comad/evolve"
 
@@ -83,6 +85,19 @@ done
 for f in validate-second-opinion.py; do
   copy_file "$REPO_ROOT/skills/comad-second-opinion/bin/$f" "$TARGET/skills/comad-second-opinion/bin/$f"
   chmod +x "$TARGET/skills/comad-second-opinion/bin/$f"
+done
+
+# --- comad-parallel (Codex 병렬 외주 + 5종 comad 통합 게이트) ---
+copy_file "$REPO_ROOT/skills/comad-parallel/SKILL.md" "$TARGET/skills/comad-parallel/SKILL.md"
+copy_file "$REPO_ROOT/skills/comad-parallel/package.json" "$TARGET/skills/comad-parallel/package.json"
+copy_file "$REPO_ROOT/skills/comad-parallel/package-lock.json" "$TARGET/skills/comad-parallel/package-lock.json"
+for f in parallel.sh parallel.cmd parallel-job.sh parallel-job.cmd parallel-job.js parallel-job-worker.js codex-output-schema.json; do
+  copy_file "$REPO_ROOT/skills/comad-parallel/scripts/$f" "$TARGET/skills/comad-parallel/scripts/$f"
+done
+chmod +x "$TARGET/skills/comad-parallel/scripts/parallel.sh" \
+         "$TARGET/skills/comad-parallel/scripts/parallel-job.sh"
+for f in anti-patterns.md codex-guide.md examples.md instruction-templates.md role-separation.md tech-stack.md; do
+  copy_file "$REPO_ROOT/skills/comad-parallel/references/$f" "$TARGET/skills/comad-parallel/references/$f"
 done
 
 # --- config template (only if target doesn't exist — don't overwrite live state) ---

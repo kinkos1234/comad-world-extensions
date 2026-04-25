@@ -1,0 +1,9 @@
+{
+  "name": "comad-parallel",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Codex parallel worker orchestrator (품앗이 — pumasi legacy)",
+  "dependencies": {
+    "yaml": "^2.8.2"
+  }
+}
