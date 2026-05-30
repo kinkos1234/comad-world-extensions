@@ -6,6 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added (2026-05-30 — R2 adversarial review + R5 judge-panel + decisions escalation)
+
+- **`hooks/stop/adversarial-review-gate.{sh,py}`** (R2) — Stop hook that
+  complements the claim-VALIDATORS: when a turn CLAIMS a *substantial* code
+  change is done (≥3 code files, a sensitive path, or a substantial git diff)
+  without a fresh `.second-opinion.md` verdict=APPROVED in the touched repo, it
+  nags. WARN-ONLY by default; `COMAD_ADVERSARIAL_REVIEW_BLOCK=1` → exit 2.
+  FAIL-OPEN.
+- **`hooks/lib/`** (new shared-lib dir) —
+  - `substantial_change.py` — git-diff/path heuristic (`is_substantial`,
+    `classify_paths`) reused by gates / QA flows.
+  - `decisions.py` — escalation queue (`~/.claude/.comad/decisions/`) so
+    autonomous processes (loopy-era, nightly-audit) surface human *decisions*
+    only (not raw logs). CLI `add|list|count|resolve` + `record_decision` /
+    `pending` library API. Also imported by comad-world's `nightly-audit.sh`.
+- **`workflows/`** (new dir — Dynamic Workflow templates) —
+  - `adversarial-review.js` (R2) — N skeptics each break the diff via a distinct
+    lens (correctness / security / edge), majority-vote a verdict, write
+    `.second-opinion.md`. The default mechanism behind adversarial-review-gate.
+  - `judge-panel.js` (R5) — N distinct strategy lenses generate approaches →
+    parallel judges score → synthesize winner + grafted runner-up ideas. For
+    wide-solution-space design / architecture / strategy decisions.
+- **`comad-qa-evidence/bin/validate-qa-evidence.py`** — `checks.second_opinion`
+  wiring so L4+ claims require an approved `.second-opinion.md`.
+- **`install.sh`** — now installs `hooks/lib/`,
+  `hooks/stop/adversarial-review-gate.{sh,py}`, and `workflows/*.js`;
+  adversarial-review-gate added to the Stop wiring snippet.
+
+### Changed (2026-05-30)
+
+- Hook count 9 → **10** (adversarial-review-gate). Stop hooks 5 → **6**.
+
 ### Added (2026-04-25 — comad-parallel as 5th skill)
 
 - **`comad-parallel`** — gptaku-plugins/pumasi v1.7.2 → ported to

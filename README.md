@@ -4,11 +4,12 @@
 
 설치하면 다음이 붙는다.
 
-- **훅 9종** — pre-tool-use 4개(destruction / env-commit / push-QA / usage gate) + Stop 5개(t6-capture / claim-done / premature-completion / numeric-claim / inventory).
+- **훅 10종** — pre-tool-use 4개(destruction / env-commit / push-QA / usage gate) + Stop 6개(t6-capture / claim-done / premature-completion / numeric-claim / inventory / **adversarial-review**). Stop 훅이 import하는 공유 라이브러리는 `hooks/lib/`(`decisions` · `substantial_change`).
 - **스킬 5종** — `comad-learn`(T6 pending 분석) / `comad-memory`(SQLite FTS5 메모리 검색) / `comad-qa-evidence`(L0~L5 QA 증거) / `comad-second-opinion`(2차 리뷰 아티팩트) / `comad-parallel`(Codex CLI 병렬 외주 + 5종 comad 통합 게이트).
+- **워크플로우 템플릿 2종** — `adversarial-review`(R2: N 회의론자가 diff를 깨려 시도 → `.second-opinion.md`) / `judge-panel`(R5: N 전략 렌즈 생성 → 병렬 심사 → 합성). `~/.claude/workflows/`에 설치, Claude Code Dynamic Workflow로 호출.
 - **T6 자가진화 루프** — Stop hook이 `fix:/feat:/bugfix:` 커밋을 `.comad/pending/*.json`에 자동 포착 → `/comad-learn`이 `memory/feedback_*.md`로 승격, 2회+ 반복은 HARD 훅 후보로 승인 요청.
 - **Approval-Gated Destruction** — `rm -rf /`, `git push --force`, `DROP DATABASE` 같은 재해급 명령을 sha256 커맨드-바인드 승인 없이는 `exit 2`로 차단. heredoc/문자열 리터럴 내부 패턴은 스트립 후 매칭해서 오탐 없음.
-- **Proof-Driven QA** — 주장이 아닌 파일(`.qa-evidence.json` + `.second-opinion.md`)이 PASS의 증거. `git push` 전 Claude Code 훅이 schema + verdict를 검증.
+- **Proof-Driven QA** — 주장이 아닌 파일(`.qa-evidence.json` + `.second-opinion.md`)이 PASS의 증거. `git push` 전 Claude Code 훅이 schema + verdict를 검증. R2 `adversarial-review-gate`(Stop)는 "substantial 코드 변경 완료 주장 + 승인된 적대적 리뷰 부재"를 감지해 경고(기본 log-only).
 
 설치는 복사 기반. 이 repo가 canonical이고 `install.sh`가 `~/.claude/` 로 복사본을 푼다. 외부 CLI 의존 없이 Python stdlib + bash만 사용.
 
@@ -24,7 +25,7 @@ cd ~/Programmer/01-comad/comad-world-extensions
 
 설치 후 두 가지 수동 작업:
 
-1. `~/.claude/settings.json`의 `hooks` 블록에 9개 훅 등록 (install.sh 종료 시 스니펫 출력)
+1. `~/.claude/settings.json`의 `hooks` 블록에 10개 훅 등록 (install.sh 종료 시 스니펫 출력)
 2. `~/.claude/CLAUDE.md`에 T6 섹션 추가 (아래 § CLAUDE.md T6)
 
 ## 훅 카탈로그
@@ -38,7 +39,7 @@ cd ~/Programmer/01-comad/comad-world-extensions
 | `qa-gate-before-push` | `.qa-evidence.json` 있으면 `verdict=PASS` 강제 | `git push` | `approve-push-qa-skip[.<hash>]` |
 | `usage-gate` | OAuth 5h/7d 쿼터 방어 (현재 dormant) | 배경 `Task` 호출 | `approve-usage-once` |
 
-### stop (5종)
+### stop (6종)
 
 | 훅 | 역할 | 로그 |
 |---|---|---|
@@ -47,8 +48,11 @@ cd ~/Programmer/01-comad/comad-world-extensions
 | `premature-completion-detector` | "수렴 달성" 조기 선언 감지 | `.comad/pending/premature-completion.jsonl` |
 | `numeric-claim-gate` | "완벽/production-ready/100%" 절대 주장 vs 실제 evidence | `.comad/pending/numeric-claim.jsonl` |
 | `inventory-gate` | coverage 주장 vs inventory cross-check | `.comad/pending/inventory-gate.jsonl` |
+| `adversarial-review-gate` | substantial 코드 변경 "완료" 주장 + 승인된 `.second-opinion.md` 부재 감지 (R2) | `.comad/pending/adversarial-review.jsonl` |
 
 Stop 훅은 기본 WARN-ONLY (exit 0 + 로그). 환경변수 `COMAD_*_BLOCK=1` 설정 시 exit 2로 승격.
+
+> Stop/QA 훅이 import하는 공유 모듈은 `hooks/lib/`에 있다 — `substantial_change.py`(diff/경로 substantial heuristic) · `decisions.py`(자율 프로세스 결정 에스컬레이션 큐; comad-world `nightly-audit.sh`도 공유).
 
 ## 스킬 카탈로그
 
@@ -95,6 +99,15 @@ git push   # qa-gate-before-push 훅이 verdict=PASS 검증 후 통과
 3. 결과를 프로젝트 루트 `.second-opinion.md`에 frontmatter + Scope/Findings/Verdict 구조로 저장
 4. 검증: `python3 ~/.claude/skills/comad-second-opinion/bin/validate-second-opinion.py` → rc 0 = APPROVED
 5. `.qa-evidence.json.checks.second_opinion` 에 `{status: PASS, artifact: ".second-opinion.md"}` 연결
+
+### 적대적 리뷰 · 판정 패널 (Dynamic Workflows)
+
+`~/.claude/workflows/`의 두 템플릿은 Claude Code Dynamic Workflow 엔진(`Workflow` 도구)으로 호출한다. headless `claude -p` cron에서는 직접 호출 불가 — 에이전트 opt-in 기능.
+
+- **`adversarial-review`** — 기존 변경을 *검증*. N명의 회의론자가 각기 다른 렌즈(correctness / security / edge)로 diff를 깨려 시도 → 과반 투표로 verdict → `.second-opinion.md` 작성. `adversarial-review-gate` 훅이 요구하는 아티팩트를 생성하는 기본 경로.
+  - args: `{ repo?, target?, panel? }` (기본 panel=3)
+- **`judge-panel`** — 해답 공간이 넓은 문제에 옵션을 *생성*. N개의 distinct 전략 렌즈(mvp-first / risk-first / user-first / long-game)가 독립 접근안 생성 → 기준별 병렬 심사 → 승자 + 차점안 아이디어 graft 합성. 설계·아키텍처·전략 결정용.
+  - args: `{ problem, strategies?, panel?, criteria? }`
 
 ### Destroy-gate 승인 플로우
 
@@ -174,12 +187,20 @@ hooks/
     premature-completion-detector.{sh,py}
     numeric-claim-gate.{sh,py}
     inventory-gate.{sh,py}
+    adversarial-review-gate.{sh,py} # R2: substantial 변경 완료 주장 + 적대적 리뷰 부재
+  lib/
+    substantial_change.py          # diff/경로 substantial heuristic (공유)
+    decisions.py                   # 자율 프로세스 결정 에스컬레이션 큐 (공유)
 
 skills/
   comad-learn/         SKILL.md + validate-{pending,feedback}.py
   comad-memory/        SKILL.md + {lib,sync,search,trace,refresh}.py
   comad-qa-evidence/   SKILL.md + {init,validate}-qa-evidence.py
   comad-second-opinion/ SKILL.md + validate-second-opinion.py
+
+workflows/
+  adversarial-review.js            # R2: N 회의론자 → .second-opinion.md
+  judge-panel.js                   # R5: N 전략 렌즈 → 심사 → 합성
 
 config/
   usage-gate.json.template

@@ -14,7 +14,8 @@ TS="$(date -u +%Y%m%dT%H%M%SZ)"
 log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[!]\033[0m %s\n' "$*" >&2; }
 
-mkdir -p "$TARGET/hooks/pre-tool-use" "$TARGET/hooks/stop" \
+mkdir -p "$TARGET/hooks/pre-tool-use" "$TARGET/hooks/stop" "$TARGET/hooks/lib" \
+         "$TARGET/workflows" \
          "$TARGET/skills/comad-learn/bin" "$TARGET/skills/comad-memory/bin" \
          "$TARGET/skills/comad-qa-evidence/bin" \
          "$TARGET/skills/comad-second-opinion/bin" \
@@ -55,6 +56,14 @@ copy_file "$REPO_ROOT/hooks/stop/numeric-claim-gate.sh" "$TARGET/hooks/stop/nume
 copy_file "$REPO_ROOT/hooks/stop/numeric-claim-gate.py" "$TARGET/hooks/stop/numeric-claim-gate.py"
 copy_file "$REPO_ROOT/hooks/stop/inventory-gate.sh" "$TARGET/hooks/stop/inventory-gate.sh"
 copy_file "$REPO_ROOT/hooks/stop/inventory-gate.py" "$TARGET/hooks/stop/inventory-gate.py"
+copy_file "$REPO_ROOT/hooks/stop/adversarial-review-gate.sh" "$TARGET/hooks/stop/adversarial-review-gate.sh"
+copy_file "$REPO_ROOT/hooks/stop/adversarial-review-gate.py" "$TARGET/hooks/stop/adversarial-review-gate.py"
+
+# --- hooks/lib: shared libs imported by stop hooks (adversarial-review-gate) and
+#     by comad-world's nightly-audit.sh (decisions escalation queue). ---
+for f in decisions.py substantial_change.py; do
+  copy_file "$REPO_ROOT/hooks/lib/$f" "$TARGET/hooks/lib/$f"
+done
 
 chmod +x "$TARGET/hooks/pre-tool-use/destroy-gate.sh" \
          "$TARGET/hooks/pre-tool-use/destroy-gate.py" \
@@ -63,7 +72,8 @@ chmod +x "$TARGET/hooks/pre-tool-use/destroy-gate.sh" \
          "$TARGET/hooks/pre-tool-use/no-env-commit.py" \
          "$TARGET/hooks/pre-tool-use/qa-gate-before-push.sh" \
          "$TARGET/hooks/pre-tool-use/qa-gate-before-push.py" \
-         "$TARGET/hooks/stop/t6-capture.sh"
+         "$TARGET/hooks/stop/t6-capture.sh" \
+         "$TARGET/hooks/stop/adversarial-review-gate.sh"
 
 # --- skills ---
 for f in SKILL.md; do
@@ -100,6 +110,13 @@ for f in anti-patterns.md codex-guide.md examples.md instruction-templates.md ro
   copy_file "$REPO_ROOT/skills/comad-parallel/references/$f" "$TARGET/skills/comad-parallel/references/$f"
 done
 
+# --- workflows (Dynamic Workflow templates) ---
+#   adversarial-review.js (R2): N skeptics try to break the diff → .second-opinion.md
+#   judge-panel.js        (R5): N strategy lenses → judged → synthesized recommendation
+for f in adversarial-review.js judge-panel.js; do
+  copy_file "$REPO_ROOT/workflows/$f" "$TARGET/workflows/$f"
+done
+
 # --- config template (only if target doesn't exist — don't overwrite live state) ---
 if [ ! -f "$TARGET/.comad/usage-gate.json" ]; then
   cp "$REPO_ROOT/config/usage-gate.json.template" "$TARGET/.comad/usage-gate.json"
@@ -131,7 +148,8 @@ Next steps:
          "hooks": [{ "type": "command", "command": "$TARGET/hooks/pre-tool-use/usage-gate.sh" }] }
      ],
      "Stop": [
-       { "hooks": [{ "type": "command", "command": "$TARGET/hooks/stop/t6-capture.sh", "timeout": 8000 }] }
+       { "hooks": [{ "type": "command", "command": "$TARGET/hooks/stop/t6-capture.sh", "timeout": 8000 }] },
+       { "hooks": [{ "type": "command", "command": "$TARGET/hooks/stop/adversarial-review-gate.sh", "timeout": 8000 }] }
      ]
    }
 
