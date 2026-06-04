@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added (2026-06-04 — 상시 가동 에이전트 2종: CI 자가복구 + PR 리뷰어)
+
+실리콘밸리 바이브코딩 강의(STEP03~04 "always-on agents")를 내재화. 둘 다 세션 밖
+launchd 폴러로 동작하며 `dry_run` 가드 + repo allowlist 로 보호. 라이브 E2E 검증 완료.
+
+- **`skills/comad-ci-healer/`** — GH Actions 실패 자가복구 상시 에이전트.
+  `poll.py`(실패 run 수집+seen.json dedup) → `classify.py`(lint/test/build/deploy/flaky
+  /unknown, IGNORECASE + Fly 인프라 패턴) → `heal.sh`(clone → headless `claude -p`
+  `--dangerously-skip-permissions` → `ci-heal/<run-id>` 브랜치 → `gh pr create`) →
+  `notify.sh`(Discord webhook[UA 헤더 필수] / queue). `run.sh` 가 launchd 진입점.
+  성공 판정 = base 대비 새 커밋. [[feedback_ci_post_push]] 규칙을 세션 밖으로 승격.
+  검증: comad-world PR 자동생성. webhook/plist 는 사용자 로컬 전용(repo 비포함).
+- **`skills/comad-pr-review/`** — Autonomous 4-axis PR Reviewer.
+  `review.sh`(codex 독립 2차 + headless claude 4축 채점 → `rubric.md` 출력계약 JSON) →
+  `post.sh`(gh 인라인 코멘트 + 요약, headSha dedup, `post_min_severity` 게이트). `run.sh`
+  폴러 + `templates/comad-pr-review.yml`(GH Actions opt-in, CLAUDE_CODE_OAUTH_TOKEN).
+  검증: probe PR 에서 SQL injection(blocker)·ZeroDivision(major) 정확 탐지 + 인라인 게시.
+
 ### Added (2026-05-30 — R2 adversarial review + R5 judge-panel + decisions escalation)
 
 - **`hooks/stop/adversarial-review-gate.{sh,py}`** (R2) — Stop hook that

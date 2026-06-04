@@ -1,0 +1,21 @@
+{
+  "_comment": "comad-pr-review config. ci-healer \uc640 allowlist \uacf5\uc720 \uac1c\ub150. dry_run \uc2dc \ud3ec\uc2a4\ud305 \uc548 \ud568.",
+  "repos": [
+    "kinkos1234/one-k-web",
+    "kinkos1234/thegongsi",
+    "kinkos1234/VidGuide",
+    "kinkos1234/comad-world"
+  ],
+  "dry_run": true,
+  "max_diff_bytes": 60000,
+  "state_dir": "~/.claude/.comad/pr-review",
+  "report_dir": "~/.claude/.comad/reports/review",
+  "notify_webhook_env": "COMAD_CI_HEALER_WEBHOOK",
+  "axes": [
+    "correctness",
+    "security",
+    "performance",
+    "convention"
+  ],
+  "post_min_severity": "major"
+}
