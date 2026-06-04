@@ -37,8 +37,12 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           # rubric 은 레포 또는 별도 위치에서 주입. 여기선 인라인 최소본.
-          PROMPT="다음 diff 를 correctness/security/performance/convention 4축으로 리뷰.
-          rubric 출력계약(JSON: verdict, summary, findings[axis,severity,file,line,title,detail,suggestion])대로 \`\`\`json 블록 하나만.
+          PROMPT="다음 diff 를 4축(correctness·security·performance·convention)으로 리뷰. \`\`\`json 블록 하나만 출력.
+          출력계약: {verdict, summary, findings[{axis, severity, file, line, title, detail, suggestion}]}
+          - verdict ∈ {approve, comment, request_changes}
+          - severity ∈ {blocker, major, minor, nit}
+          - axis ∈ {correctness, security, performance, convention}
+          발견 없으면 findings:[] + verdict:approve. 추정은 severity 낮추고 detail 에 '불확실' 명시.
           $(cat /tmp/pr.diff)"
           claude -p "$PROMPT" --dangerously-skip-permissions > /tmp/out.txt 2>&1 || true
           python3 - <<'PY'
