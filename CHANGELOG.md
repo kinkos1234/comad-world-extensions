@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added (2026-06-04 — harness-report 8번째 스킬: 5축 점수 + 비용/efficiency)
+
+- **`skills/harness-report/`** — Loopy-Era 하네스 자가측정. `harness-report.py`가
+  5축(HARD coverage·pending throughput·recurring·second-opinion·evolve) 0~100
+  composite 를 `~/.claude/.comad/results.tsv` 에 append(구 11컬럼 → 13컬럼 자동
+  마이그레이션). `collect-cost.py` 가 트랜스크립트 usage 24h 윈도우를 모델별
+  notional list-price 로 집계(Max 정액 → 실청구 아님). **비용은 composite 에
+  미합산** — efficiency = score/Mtok 별도 지표. `dashboard.py` 는 무의존 인라인
+  SVG HTML 대시보드. `/loopy:status`·자율루프 측정에 자동 반영.
+
 ### Added (2026-06-04 — 상시 가동 에이전트 2종: CI 자가복구 + PR 리뷰어)
 
 실리콘밸리 바이브코딩 강의(STEP03~04 "always-on agents")를 내재화. 둘 다 세션 밖

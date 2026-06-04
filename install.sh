@@ -24,6 +24,7 @@ mkdir -p "$TARGET/hooks/pre-tool-use" "$TARGET/hooks/stop" "$TARGET/hooks/lib" \
          "$TARGET/skills/comad-ci-healer/bin" \
          "$TARGET/skills/comad-pr-review/bin" \
          "$TARGET/skills/comad-pr-review/templates" \
+         "$TARGET/skills/harness-report/bin" \
          "$TARGET/.comad/approvals" "$TARGET/.comad/pending" \
          "$TARGET/.comad/memory" "$TARGET/.comad/evolve"
 
@@ -135,6 +136,12 @@ chmod +x "$TARGET/skills/comad-pr-review/bin/review.sh" \
          "$TARGET/skills/comad-pr-review/bin/post.sh" \
          "$TARGET/skills/comad-pr-review/bin/run.sh"
 copy_file "$REPO_ROOT/skills/comad-pr-review/templates/comad-pr-review.yml" "$TARGET/skills/comad-pr-review/templates/comad-pr-review.yml"
+
+# --- harness-report (Loopy-Era 5축 점수 + 비용/efficiency 측정) ---
+copy_file "$REPO_ROOT/skills/harness-report/SKILL.md" "$TARGET/skills/harness-report/SKILL.md"
+for f in harness-report.py collect-cost.py dashboard.py; do
+  copy_file "$REPO_ROOT/skills/harness-report/bin/$f" "$TARGET/skills/harness-report/bin/$f"
+done
 
 # --- workflows (Dynamic Workflow templates) ---
 #   adversarial-review.js (R2): N skeptics try to break the diff → .second-opinion.md
