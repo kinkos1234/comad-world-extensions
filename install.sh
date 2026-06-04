@@ -21,6 +21,9 @@ mkdir -p "$TARGET/hooks/pre-tool-use" "$TARGET/hooks/stop" "$TARGET/hooks/lib" \
          "$TARGET/skills/comad-second-opinion/bin" \
          "$TARGET/skills/comad-parallel/scripts" \
          "$TARGET/skills/comad-parallel/references" \
+         "$TARGET/skills/comad-ci-healer/bin" \
+         "$TARGET/skills/comad-pr-review/bin" \
+         "$TARGET/skills/comad-pr-review/templates" \
          "$TARGET/.comad/approvals" "$TARGET/.comad/pending" \
          "$TARGET/.comad/memory" "$TARGET/.comad/evolve"
 
@@ -109,6 +112,29 @@ chmod +x "$TARGET/skills/comad-parallel/scripts/parallel.sh" \
 for f in anti-patterns.md codex-guide.md examples.md instruction-templates.md role-separation.md tech-stack.md; do
   copy_file "$REPO_ROOT/skills/comad-parallel/references/$f" "$TARGET/skills/comad-parallel/references/$f"
 done
+
+# --- comad-ci-healer (GH Actions 자가복구 상시 에이전트) ---
+#   launchd plist + webhook 은 사용자 로컬에서만 설정(공개 repo 비포함). SKILL.md 참고.
+copy_file "$REPO_ROOT/skills/comad-ci-healer/SKILL.md" "$TARGET/skills/comad-ci-healer/SKILL.md"
+copy_file "$REPO_ROOT/skills/comad-ci-healer/config.json" "$TARGET/skills/comad-ci-healer/config.json"
+for f in poll.py classify.py heal.sh notify.sh run.sh; do
+  copy_file "$REPO_ROOT/skills/comad-ci-healer/bin/$f" "$TARGET/skills/comad-ci-healer/bin/$f"
+done
+chmod +x "$TARGET/skills/comad-ci-healer/bin/heal.sh" \
+         "$TARGET/skills/comad-ci-healer/bin/notify.sh" \
+         "$TARGET/skills/comad-ci-healer/bin/run.sh"
+
+# --- comad-pr-review (Autonomous 4-axis PR Reviewer) ---
+copy_file "$REPO_ROOT/skills/comad-pr-review/SKILL.md" "$TARGET/skills/comad-pr-review/SKILL.md"
+copy_file "$REPO_ROOT/skills/comad-pr-review/config.json" "$TARGET/skills/comad-pr-review/config.json"
+copy_file "$REPO_ROOT/skills/comad-pr-review/rubric.md" "$TARGET/skills/comad-pr-review/rubric.md"
+for f in review.sh post.sh run.sh; do
+  copy_file "$REPO_ROOT/skills/comad-pr-review/bin/$f" "$TARGET/skills/comad-pr-review/bin/$f"
+done
+chmod +x "$TARGET/skills/comad-pr-review/bin/review.sh" \
+         "$TARGET/skills/comad-pr-review/bin/post.sh" \
+         "$TARGET/skills/comad-pr-review/bin/run.sh"
+copy_file "$REPO_ROOT/skills/comad-pr-review/templates/comad-pr-review.yml" "$TARGET/skills/comad-pr-review/templates/comad-pr-review.yml"
 
 # --- workflows (Dynamic Workflow templates) ---
 #   adversarial-review.js (R2): N skeptics try to break the diff → .second-opinion.md

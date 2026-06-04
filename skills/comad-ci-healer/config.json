@@ -1,0 +1,18 @@
+{
+  "_comment": "comad-ci-healer config. allowlist만 처리. dry_run=true면 PR 안 냄.",
+  "repos": [
+    "kinkos1234/one-k-web",
+    "kinkos1234/thegongsi",
+    "kinkos1234/VidGuide",
+    "kinkos1234/comad-world"
+  ],
+  "max_attempts": 2,
+  "branch_prefix": "ci-heal/",
+  "poll_limit": 10,
+  "dry_run": true,
+  "notify_webhook_env": "COMAD_CI_HEALER_WEBHOOK",
+  "state_dir": "~/.claude/.comad/ci-healer",
+  "auto_fix_categories": ["lint", "build"],
+  "rerun_only_categories": ["flaky"],
+  "escalate_categories": ["deploy", "unknown"]
+}
