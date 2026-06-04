@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added (2026-06-04 — brain 활용 2종: comad-recall + comad-foresight)
+
+comad-brain(축적만 되던 60K+ 노드 그래프)을 실제 작업 outcome 으로 전환. 모든 단계
+블라인드 A/B + LLM 심사로 검증(activity 아닌 outcome lift). ⚠️ **comad-brain Neo4j 필요**.
+
+- **`skills/comad-recall/`** — brain 을 "claim 오라클"이 아니라 **"출처 검색 인덱스"**로.
+  `recall.sh` 가 주제의 매칭엔티티+기술계보+실재 ear-큐레이션 기사(제목·날짜·URL)를 지식팩으로
+  추출. 핵심 발견: brain Claim 19,686개 **전부 verified=FALSE** → claim 주입은 outcome 악화
+  (−0.31), 실재 Article 만 신뢰하니 **recency 질문 +3.12 lift**. 선택적 발화(최신/니치만).
+- **`skills/comad-foresight/`** — brain hot클러스터를 **10렌즈 전략 foresight**(손자·스미스·탈레브
+  ·카너먼·메도우즈·데카르트·마키아벨리·클라우제비츠·헤겔·다윈, eye `lens_knowledge.py` 포팅)로
+  재해석. `cluster.sh`(hot클러스터 탐지) + `digest.sh`(주간 그래프 다이제스트) + `run.sh`(통합
+  주간 인텔리전스 리포트 → Discord, launchd 주간). plain 분석 대비 **+1.375 lift**. comad-eye 의
+  로컬-추출 파이프라인(캐시버그+weak LLM)은 폐기하고 컨셉만 승계.
+
 ### Added (2026-06-04 — harness-report 8번째 스킬: 5축 점수 + 비용/efficiency)
 
 - **`skills/harness-report/`** — Loopy-Era 하네스 자가측정. `harness-report.py`가

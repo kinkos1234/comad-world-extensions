@@ -1,0 +1,10 @@
+{
+  "_comment": "comad-foresight 자동화. dry_run=true면 Discord 전송 안 하고 리포트만 저장.",
+  "dry_run": true,
+  "cluster_entities": "",
+  "_cluster_note": "비우면 hot 클러스터 자동탐지. 지정하려면 'Claude Code,Codex,Gemini' 형식.",
+  "report_dir": "~/.claude/.comad/foresight",
+  "state_dir": "~/.claude/.comad/foresight",
+  "notify_webhook_env": "COMAD_CI_HEALER_WEBHOOK",
+  "min_articles": 8
+}

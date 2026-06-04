@@ -25,6 +25,9 @@ mkdir -p "$TARGET/hooks/pre-tool-use" "$TARGET/hooks/stop" "$TARGET/hooks/lib" \
          "$TARGET/skills/comad-pr-review/bin" \
          "$TARGET/skills/comad-pr-review/templates" \
          "$TARGET/skills/harness-report/bin" \
+         "$TARGET/skills/comad-recall/bin" \
+         "$TARGET/skills/comad-foresight/bin" \
+         "$TARGET/skills/comad-foresight/references" \
          "$TARGET/.comad/approvals" "$TARGET/.comad/pending" \
          "$TARGET/.comad/memory" "$TARGET/.comad/evolve"
 
@@ -141,6 +144,18 @@ copy_file "$REPO_ROOT/skills/comad-pr-review/templates/comad-pr-review.yml" "$TA
 copy_file "$REPO_ROOT/skills/harness-report/SKILL.md" "$TARGET/skills/harness-report/SKILL.md"
 for f in harness-report.py collect-cost.py dashboard.py; do
   copy_file "$REPO_ROOT/skills/harness-report/bin/$f" "$TARGET/skills/harness-report/bin/$f"
+done
+
+# --- comad-recall / comad-foresight (brain 활용 — ⚠️ comad-brain Neo4j 필요) ---
+copy_file "$REPO_ROOT/skills/comad-recall/SKILL.md" "$TARGET/skills/comad-recall/SKILL.md"
+copy_file "$REPO_ROOT/skills/comad-recall/bin/recall.sh" "$TARGET/skills/comad-recall/bin/recall.sh"
+chmod +x "$TARGET/skills/comad-recall/bin/recall.sh"
+copy_file "$REPO_ROOT/skills/comad-foresight/SKILL.md" "$TARGET/skills/comad-foresight/SKILL.md"
+copy_file "$REPO_ROOT/skills/comad-foresight/config.json" "$TARGET/skills/comad-foresight/config.json"
+copy_file "$REPO_ROOT/skills/comad-foresight/references/lenses.md" "$TARGET/skills/comad-foresight/references/lenses.md"
+for f in cluster.sh digest.sh run.sh; do
+  copy_file "$REPO_ROOT/skills/comad-foresight/bin/$f" "$TARGET/skills/comad-foresight/bin/$f"
+  chmod +x "$TARGET/skills/comad-foresight/bin/$f"
 done
 
 # --- workflows (Dynamic Workflow templates) ---
