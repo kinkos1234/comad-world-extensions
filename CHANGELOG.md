@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added (2026-06-05 — 하네스 강의 검토 반영: comad-sdd + Codex worker conventions + 역할 taxonomy)
+
+패스트캠퍼스 "하네스 엔지니어링"(전현준/oh-my-openagent) 커리큘럼 검토 결과, comad가
+이미 보유한 부분(8개 핵심 개념 중 7개)을 제외하고 갭 3종을 우리 기존 부품 재배선으로 메움.
+
+- **`skills/comad-sdd/`** — Spec-Driven Development 닫힌 루프 스킬. show-me-the-prd(무엇을)와
+  autoplan(계획이 탄탄한가) 사이에 비어있던 **"명세 → 검증가능한 완료기준 → 구현 → 완료기준 대조"**
+  골격. 5단계 SPEC→PLAN→BUILD→VERIFY→CLOSE, 각 완료기준(AC)을 test/gate/관찰에 1:1 매핑.
+  `check-acceptance.sh` 종료 게이트(미체크 AC + FAIL 0개여야 종료 허용, BLOCKED↔PASS 양방향 검증).
+- **`config/codex-agents-comad-conventions.md`** — `~/.codex/AGENTS.md` 에 멱등 주입되는
+  Codex 워커 컨벤션 5종(구현충실도 / 강한게이트 / qa-evidence / feat:fix 커밋 / 파괴명령 금지).
+  comad-parallel(품앗이) Codex 워커가 자기 게이트(qa-gate·destroy-check·T6-capture)를
+  기본값으로 통과 → 반려율↓. install.sh 가 마커(`COMAD-WORKER-CONVENTIONS-START`)로 멱등 append.
+- **역할 taxonomy 표준화** (사용자 memory, repo 미포함) — Workflow/agent 작성 시 ad-hoc 라벨 대신
+  표준 5역할(SCOUT·PLANNER·WORKER·VERIFIER·KNOWLEDGE) + agentType 매핑. OmO Prometheus/Atlas/
+  Sisyphus/Oracle 의 comad-native 대응. 역할 축 ⊥ 메커니즘 축("누가 코드를 쓰나").
+
 ### Added (2026-06-04 — brain 활용 2종: comad-recall + comad-foresight)
 
 comad-brain(축적만 되던 60K+ 노드 그래프)을 실제 작업 outcome 으로 전환. 모든 단계

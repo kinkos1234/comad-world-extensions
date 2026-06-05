@@ -28,6 +28,7 @@ mkdir -p "$TARGET/hooks/pre-tool-use" "$TARGET/hooks/stop" "$TARGET/hooks/lib" \
          "$TARGET/skills/comad-recall/bin" \
          "$TARGET/skills/comad-foresight/bin" \
          "$TARGET/skills/comad-foresight/references" \
+         "$TARGET/skills/comad-sdd/scripts" \
          "$TARGET/.comad/approvals" "$TARGET/.comad/pending" \
          "$TARGET/.comad/memory" "$TARGET/.comad/evolve"
 
@@ -158,12 +159,31 @@ for f in cluster.sh digest.sh run.sh; do
   chmod +x "$TARGET/skills/comad-foresight/bin/$f"
 done
 
+# --- comad-sdd (Spec-Driven Development 루프 — SPEC→완료기준→PLAN→BUILD→VERIFY) ---
+copy_file "$REPO_ROOT/skills/comad-sdd/SKILL.md" "$TARGET/skills/comad-sdd/SKILL.md"
+copy_file "$REPO_ROOT/skills/comad-sdd/scripts/check-acceptance.sh" "$TARGET/skills/comad-sdd/scripts/check-acceptance.sh"
+chmod +x "$TARGET/skills/comad-sdd/scripts/check-acceptance.sh"
+
 # --- workflows (Dynamic Workflow templates) ---
 #   adversarial-review.js (R2): N skeptics try to break the diff → .second-opinion.md
 #   judge-panel.js        (R5): N strategy lenses → judged → synthesized recommendation
 for f in adversarial-review.js judge-panel.js; do
   copy_file "$REPO_ROOT/workflows/$f" "$TARGET/workflows/$f"
 done
+
+# --- Codex AGENTS.md worker conventions (idempotent append to ~/.codex/AGENTS.md) ---
+#   comad-parallel(품앗이)이 띄우는 Codex 워커가 qa-gate/destroy-check/T6-capture 를
+#   기본값으로 통과하도록 CLAUDE.md 의 Codex-side 미러를 ~/.codex/AGENTS.md 에 주입.
+CODEX_AGENTS="$HOME/.codex/AGENTS.md"
+if [ -f "$REPO_ROOT/config/codex-agents-comad-conventions.md" ]; then
+  mkdir -p "$HOME/.codex"
+  if [ -f "$CODEX_AGENTS" ] && grep -q "COMAD-WORKER-CONVENTIONS-START" "$CODEX_AGENTS"; then
+    log "preserved existing comad worker conventions in $CODEX_AGENTS (already present)"
+  else
+    cat "$REPO_ROOT/config/codex-agents-comad-conventions.md" >> "$CODEX_AGENTS"
+    log "appended comad worker conventions to $CODEX_AGENTS"
+  fi
+fi
 
 # --- config template (only if target doesn't exist — don't overwrite live state) ---
 if [ ! -f "$TARGET/.comad/usage-gate.json" ]; then
