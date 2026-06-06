@@ -29,6 +29,8 @@ mkdir -p "$TARGET/hooks/pre-tool-use" "$TARGET/hooks/stop" "$TARGET/hooks/lib" \
          "$TARGET/skills/comad-foresight/bin" \
          "$TARGET/skills/comad-foresight/references" \
          "$TARGET/skills/comad-sdd/scripts" \
+         "$TARGET/skills/comad-taste/references" \
+         "$TARGET/skills/comad-taste/scripts" \
          "$TARGET/.comad/approvals" "$TARGET/.comad/pending" \
          "$TARGET/.comad/memory" "$TARGET/.comad/evolve"
 
@@ -163,6 +165,17 @@ done
 copy_file "$REPO_ROOT/skills/comad-sdd/SKILL.md" "$TARGET/skills/comad-sdd/SKILL.md"
 copy_file "$REPO_ROOT/skills/comad-sdd/scripts/check-acceptance.sh" "$TARGET/skills/comad-sdd/scripts/check-acceptance.sh"
 chmod +x "$TARGET/skills/comad-sdd/scripts/check-acceptance.sh"
+
+# --- comad-taste (Taste Layer — 레퍼런스×자기비평으로 디자인 퀄리티 상향) ---
+copy_file "$REPO_ROOT/skills/comad-taste/SKILL.md" "$TARGET/skills/comad-taste/SKILL.md"
+for f in design-dna.md anti-slop.md taste-rubric.md; do
+  copy_file "$REPO_ROOT/skills/comad-taste/references/$f" "$TARGET/skills/comad-taste/references/$f"
+done
+for f in render.sh render.mjs swipe-harvest-plusex.mjs swipe-harvest-urls.mjs; do
+  copy_file "$REPO_ROOT/skills/comad-taste/scripts/$f" "$TARGET/skills/comad-taste/scripts/$f"
+done
+chmod +x "$TARGET/skills/comad-taste/scripts/render.sh"
+# swipe 이미지 코퍼스는 로컬 런타임 자산(하베스터가 재생성) — repo/install 미포함.
 
 # --- workflows (Dynamic Workflow templates) ---
 #   adversarial-review.js (R2): N skeptics try to break the diff → .second-opinion.md

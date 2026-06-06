@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added (2026-06-06 — comad-taste: Taste Layer 디자인 퀄리티 상향)
+
+피그마 MCP 강의 검토 → "AI 디자인 생성 퀄리티 갭"의 본질 도출: **퀄리티 ≈ (레퍼런스의 질)
+× (자기비평 반복 깊이)** 이며 모델 성능이 아니다. 이 진단을 시스템으로 고정.
+
+- **`skills/comad-taste/`** — 모든 디자인 생성에 끼우는 공통 Taste Layer.
+  - `references/design-dna.md` — 탑티어 미감 코퍼스 **6 아키타입**(Dark Product·Light Editorial·
+    Warm Consumer·Bold Statement·Dense Utility·**Studio Brand-Editorial**). 텍스트 지시("Minimalist")
+    대신 구조화 토큰을 통째로 주입. F 아키타입은 plus-ex 142작 하베스트로 추출.
+  - `references/anti-slop.md` — generic-AI 탐지(즉시탈락 6 + 아마추어표식 9 + 고급표식).
+  - `references/taste-rubric.md` — 6축 채점(색절제·타입·공간·표면·신뢰·차별), 24/30 미만 재생성.
+  - `scripts/render.{sh,mjs}` — playwright 렌더→@2x 스크린샷(자기비평이 결과를 실제로 "보게" 함).
+  - `scripts/swipe-harvest-{plusex,urls}.mjs` — 디자인 스튜디오 작업물을 swipe 코퍼스로 자산화.
+  - 5단계 루프: TASTE SELECT→GENERATE→RENDER&SEE→CRITIQUE→REGENERATE→GATE.
+  - 검증(dogfooding): comad 랜딩 21→27/30, 가이드 13페이지 톤 통일 → 라이브 배포.
+  - ⚠️ swipe 이미지 코퍼스(수백 장)는 로컬 런타임 자산 — repo/install 미포함(하베스터가 재생성).
+
 ### Added (2026-06-05 — 하네스 강의 검토 반영: comad-sdd + Codex worker conventions + 역할 taxonomy)
 
 패스트캠퍼스 "하네스 엔지니어링"(전현준/oh-my-openagent) 커리큘럼 검토 결과, comad가
