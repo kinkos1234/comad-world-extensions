@@ -19,10 +19,13 @@ for(const url of urls){
   const ctx = await b.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1});
   const p = await ctx.newPage();
   try{
-    await p.goto(url,{waitUntil:'networkidle',timeout:45000});
-    await p.waitForTimeout(2500);
-    await p.evaluate(async()=>{for(let y=0;y<2600;y+=650){window.scrollTo(0,y);await new Promise(r=>setTimeout(r,130));}window.scrollTo(0,0);});
-    await p.waitForTimeout(500);
+    // 'load' + 고정대기 — JS-heavy 스튜디오 SPA 는 networkidle 가 안 가라앉아 timeout 나므로
+    // 'load'(DOM+리소스) 후 고정대기 + 스크롤로 lazy 로드 트리거. (PW_WAIT env 로 대기 조정)
+    const wait = parseInt(process.env.PW_WAIT || '3500', 10);
+    await p.goto(url,{waitUntil:'load',timeout:Number(process.env.PW_TIMEOUT||'70000')});
+    await p.waitForTimeout(wait);
+    await p.evaluate(async()=>{for(let y=0;y<3000;y+=600){window.scrollTo(0,y);await new Promise(r=>setTimeout(r,160));}window.scrollTo(0,0);});
+    await p.waitForTimeout(800);
     await p.screenshot({path:out,clip:{x:0,y:0,width:1440,height:1600}});
     appendFileSync(cat,`${slug}\t${slug}.png\t${url}\n`); ok++;
     console.log(`[${ok+fail}/${urls.length}] ${slug}`);
