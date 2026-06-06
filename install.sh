@@ -171,7 +171,7 @@ copy_file "$REPO_ROOT/skills/comad-taste/SKILL.md" "$TARGET/skills/comad-taste/S
 for f in design-dna.md anti-slop.md taste-rubric.md; do
   copy_file "$REPO_ROOT/skills/comad-taste/references/$f" "$TARGET/skills/comad-taste/references/$f"
 done
-for f in render.sh render.mjs swipe-harvest-plusex.mjs swipe-harvest-urls.mjs; do
+for f in render.sh render.mjs build-catalog.mjs swipe-search.mjs swipe-harvest-plusex.mjs swipe-harvest-urls.mjs; do
   copy_file "$REPO_ROOT/skills/comad-taste/scripts/$f" "$TARGET/skills/comad-taste/scripts/$f"
 done
 chmod +x "$TARGET/skills/comad-taste/scripts/render.sh"
