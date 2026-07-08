@@ -1,12 +1,12 @@
 {
-  "_comment": "comad-pr-review config. ci-healer \uc640 allowlist \uacf5\uc720 \uac1c\ub150. dry_run \uc2dc \ud3ec\uc2a4\ud305 \uc548 \ud568.",
+  "_comment": "comad-pr-review config. ci-healer 와 allowlist 공유 개념. dry_run 시 포스팅 안 함.",
   "repos": [
     "kinkos1234/one-k-web",
     "kinkos1234/thegongsi",
     "kinkos1234/VidGuide",
     "kinkos1234/comad-world"
   ],
-  "dry_run": true,
+  "dry_run": false,
   "max_diff_bytes": 60000,
   "state_dir": "~/.claude/.comad/pr-review",
   "report_dir": "~/.claude/.comad/reports/review",
@@ -17,5 +17,6 @@
     "performance",
     "convention"
   ],
-  "post_min_severity": "major"
+  "post_min_severity": "major",
+  "grader": true
 }
