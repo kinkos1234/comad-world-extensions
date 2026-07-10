@@ -1,6 +1,6 @@
 ---
 name: comad-taste
-description: AI 디자인 생성 퀄리티를 탑티어(인간 디자이너·상위 바이브코더) 수준으로 끌어올리는 공통 "Taste Layer". 핵심 진단 — 생성 퀄리티 ≈ (주입한 레퍼런스의 질) × (자기비평 반복 깊이)이며 모델 성능이 아니다. 그래서 ① design-dna 코퍼스(구조화 미감 스펙)를 텍스트지시 대신 통째로 주입하고 ② generate→render→screenshot→critique(6축 루브릭+anti-slop)→regenerate 자기비평 루프를 돌린다. UI/HTML/랜딩/컴포넌트/카드 등 시각 산출물 생성 시 design-shotgun·design-html·comad-brand-factory·comad-image·comad-app-prototype·comad-infographic 앞단에 끼우는 레이어. 트리거 — 한국어 "taste, 테이스트, 디자인 퀄리티, 고급스럽게, AI티 없애, 탑티어 디자인, 레퍼런스 주입, 자기비평 디자인, 디자인 끌어올려, 세련되게 만들어, 퀄리티 높여"; 영어 "taste layer, design quality, make it premium, top-tier design, anti-slop, less generic, elevate the design, reference-driven design". 단순 와이어프레임·기능 우선 프로토타입엔 트리거 안 함(미감 불필요할 때 오버헤드).
+description: AI 디자인 생성 퀄리티를 탑티어(인간 디자이너·상위 바이브코더) 수준으로 끌어올리는 공통 "Taste Layer". 핵심 진단 — 생성 퀄리티 ≈ (주입한 레퍼런스의 질) × (자기비평 반복 깊이)이며 모델 성능이 아니다. 그래서 ① design-dna 코퍼스(구조화 미감 스펙)를 텍스트지시 대신 통째로 주입하고 ② generate→render→screenshot→critique(6축 루브릭+anti-slop)→regenerate 자기비평 루프를 돌린다. UI/HTML/랜딩/컴포넌트/카드 등 시각 산출물 생성 시 design-shotgun·design-html·comad-brand-factory·comad-image·comad-app-prototype·comad-infographic 앞단에 끼우는 레이어. 동적 웹사이트(스크롤 애니메이션·마이크로인터랙션)는 frontend-design + gsap-* 스킬과 병용(S1 동적 웹사이트 경로). 트리거 — 한국어 "taste, 테이스트, 디자인 퀄리티, 고급스럽게, AI티 없애, 탑티어 디자인, 레퍼런스 주입, 자기비평 디자인, 디자인 끌어올려, 세련되게 만들어, 퀄리티 높여, 동적 웹사이트, 스크롤 애니메이션, 인터랙티브 랜딩, 모션 있는 사이트"; 영어 "taste layer, design quality, make it premium, top-tier design, anti-slop, less generic, elevate the design, reference-driven design, dynamic website, scroll animation, interactive landing". 단순 와이어프레임·기능 우선 프로토타입엔 트리거 안 함(미감 불필요할 때 오버헤드).
 ---
 
 # comad-taste — Taste Layer
@@ -22,7 +22,7 @@ description: AI 디자인 생성 퀄리티를 탑티어(인간 디자이너·상
 **Layer 1 — 통합 DNA (항상):**
 1. `references/design-dna.md` 에서 프로젝트 도메인/톤에 맞는 **아키타입 1개** 선택 (A.Dark Product / B.Light Editorial / C.Warm Consumer / D.Bold Statement / E.Dense Utility / F.Studio Brand-Editorial).
 2. 그 아키타입의 **전체 스펙(색·타입·spacing·surface·signature·anti)을 통째로** 생성 컨텍스트/프롬프트에 박는다. "Minimalist" 같은 추상 텍스트 금지 — 구체 토큰.
-3. 프로젝트에 DESIGN.md 있으면 토큰을 그쪽 우선으로 오버라이드(브랜드색 등).
+3. 프로젝트에 DESIGN.md 있으면 `references/design-md-bridge.md` 규칙으로 병합 — 아이덴티티(색·폰트·톤)는 DESIGN.md 가 이기고, 구조 규율(위계·여백·surface·anti·모션)은 아키타입이 이긴다. DESIGN.md 를 새로 만드는 경우(design-consultation 호출)도 같은 문서의 "방향 2" 를 따라 아키타입 스탬프를 남긴다.
 
 **Layer 2 — 케이스별 레퍼런스 자동검색 (swipe 코퍼스 있을 때, 미감 중요 작업):**
 4. **에이전트가 스스로 판단해 검색한다.** 작업의 미감/도메인 키워드를 추론(예: "dark fintech dashboard", "editorial poster", "brand hero")하고:
@@ -39,6 +39,12 @@ PW_BASE=~/.claude/skills/gstack/node_modules \
 ### S1. GENERATE v1
 선택 DNA + `references/anti-slop.md` 회피규칙을 적용해 산출물(HTML/React/이미지프롬프트) 생성.
 - 실콘텐츠·실숫자·고유명사 사용(플레이스홀더 금지). 제품 UI면 **실제 목업**(브라우저 chrome·사이드바·KPI·SVG차트) 포함.
+
+**동적 웹사이트 경로 (2026-07-10 추가)** — 랜딩/웹사이트/인터랙티브 페이지 생성 시:
+1. **방향**: `frontend-design` 스킬(Anthropic 공식, 벤더링됨) 지침 병용 — signature 요소 1곳에 과감함을 몰고 나머지는 절제, "orchestrated moment > scattered effects".
+2. **모션 토큰**: `references/design-dna.md` **MOTION DNA** 섹션에서 선택 아키타입의 모션 행을 통째로 주입 (추상 지시 금지).
+3. **구현**: 스크롤/타임라인/마이크로인터랙션은 **GSAP 공식 스킬**(gsap-core·gsap-scrolltrigger·gsap-timeline·gsap-react 등, 벤더링됨) 패턴으로. `prefers-reduced-motion` 분기(`gsap.matchMedia()`) 필수.
+4. **채점**: 모션은 S2 스크린샷으로 못 본다 — Playwright 로 스크롤 중간 지점 2~3컷 추가 캡처하거나 browse 데몬으로 실제 스크롤해 확인 후 S3 채점에 반영.
 
 ### S2. RENDER & SEE — 결과를 실제로 본다 (핵심)
 HTML/UI는 반드시 렌더해서 스크린샷을 **Read 로 본다**. 안 보면 자기비평 불가.
@@ -97,3 +103,4 @@ v2: 색4 타입4 공간4 표면4 신뢰4 차별4 = 24/30 → 통과
 - **통합 DNA**: 새 탑티어 레퍼런스 → `design-dna.md` 해당 아키타입에 토큰/소스 **append**.
 - **케이스별 swipe**: 새 스튜디오 → `swipe-harvest-urls.mjs <urls> swipe/<studio>` 로 하베스트 → `build-catalog.mjs` 재실행. swipe-search 가 즉시 검색 대상에 포함.
 - 코퍼스가 자랄수록 생성 품질이 복리로 오른다. swipe 이미지는 로컬 전용(repo 미포함).
+- **유지보수 규약 (2026-07-10)**: 이 스킬 발화 시 `find references/swipe -name "*.png" | wc -l` 과 catalog 엔트리 수가 어긋나면 `build-catalog.mjs` 재실행(무비용). 신규 스튜디오 하베스트는 분기 1회 또는 새 미감 필요 시. taste-gate PASS 산출물 중 재사용 가치 있는 것은 `swipe/comad/` 에 축적 가능(자가 코퍼스).

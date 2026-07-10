@@ -143,6 +143,36 @@
 
 ---
 
+## MOTION DNA — 동적 웹사이트 모션 어휘 (2026-07-10 추가)
+
+> 정적 미감과 같은 원리: "부드럽게 애니메이션" 같은 추상 지시 금지, 아래 구체 토큰을 주입.
+> 구현 라이브러리는 **GSAP**(gsap-core/gsap-scrolltrigger/gsap-timeline 스킬 참조 — 공식 스킬 벤더링됨).
+> 방향 설계는 **frontend-design** 스킬("orchestrated moment > scattered effects")과 병용.
+
+**공통 규율 (모든 아키타입):**
+- **transform·opacity 만 애니메이션** (layout 속성 금지 — 60fps 보장). `will-change` 남발 금지.
+- **`prefers-reduced-motion` 필수 존중** — `gsap.matchMedia()` 로 분기, 미디어쿼리 없이 출시 금지.
+- **한 페이지 한 오케스트레이션** — 페이지로드 시퀀스(hero) 1개 + 스크롤 리빌 1패턴 + 호버 마이크로 1패턴. 그 이상은 산만함(=AI 티).
+- **easing 은 물체다**: 진입 `power3.out`/`expo.out`, 퇴장 `power2.in`, 스크럽은 `ease:none` (comad-motion §0 철학 공유).
+- 스크롤 애니메이션은 **콘텐츠가 스스로 설명되는 보조**여야 — 스크롤 없이도 정보가 완결돼야 한다.
+
+**아키타입별 모션 성격:**
+| 아키타입 | 모션 성격 | 구체 토큰 |
+|---|---|---|
+| A. Dark Product | 정밀·미세. 존재감은 glow 로 | fade+rise 12px, 0.5~0.7s, stagger 0.06s. 위험광 opacity 미세 pulse(8s). hover: translateY(-1px)+border 밝기만 |
+| B. Light Editorial | 느리고 문학적 | 텍스트 line-mask 리빌(0.9s), 이미지 slow scale(1.04→1). 스크롤 fade 만, 패럴랙스 금지 |
+| C. Warm Consumer | 부드러운 스프링 | `back.out(1.4)` 소량, scale 0.97→1. 바운스는 CTA 1곳만 |
+| D. Bold Statement | 크고 단호 | clip-path wipe, 거대타입 slide-in(-0.04em 트래킹 유지), marquee 1개 허용. duration 짧게(0.4s) |
+| E. Dense Utility | 모션 최소 | 120~160ms fade 만. 장식 모션 0. 상태 변화만 표현 |
+| F. Studio Brand-Editorial | 아이덴티티 리빌·시네마틱 | 히어로 리빌 시퀀스(로고 부상 1.2s), ScrollTrigger pin+scrub 케이스스터디, 이미지 패럴랙스(yPercent ±8), 카운터 tick-up |
+
+**즉시탈락 (motion anti-slop):**
+- 모든 섹션 동일한 fade-in-up 반복 (PowerPoint 냄새) · bounce 남발 · 스크롤 하이재킹(휠 강탈) · 3초+ 로딩 인트로 · 커서 팔로워 장식(브랜드 근거 없이) · AOS 기본값 티 나는 균일 duration.
+
+**채점**: 모션 있는 산출물은 taste-rubric 6축 중 "차별성"·"신뢰감" 축에서 모션 품질을 함께 평가 — 모션이 orchestrated 면 가점, scattered 면 감점.
+
+---
+
 ## 사용 패턴 (생성 컨텍스트 주입 예)
 
 ```
