@@ -42,9 +42,10 @@ PW_BASE=~/.claude/skills/gstack/node_modules \
 
 **동적 웹사이트 경로 (2026-07-10 추가)** — 랜딩/웹사이트/인터랙티브 페이지 생성 시:
 1. **방향**: `frontend-design` 스킬(Anthropic 공식, 벤더링됨) 지침 병용 — signature 요소 1곳에 과감함을 몰고 나머지는 절제, "orchestrated moment > scattered effects".
-2. **모션 토큰**: `references/design-dna.md` **MOTION DNA** 섹션에서 선택 아키타입의 모션 행을 통째로 주입 (추상 지시 금지).
-3. **구현**: 스크롤/타임라인/마이크로인터랙션은 **GSAP 공식 스킬**(gsap-core·gsap-scrolltrigger·gsap-timeline·gsap-react 등, 벤더링됨) 패턴으로. `prefers-reduced-motion` 분기(`gsap.matchMedia()`) 필수.
-4. **채점**: 모션은 S2 스크린샷으로 못 본다 — Playwright 로 스크롤 중간 지점 2~3컷 추가 캡처하거나 browse 데몬으로 실제 스크롤해 확인 후 S3 채점에 반영.
+2. **철학·용어**: **Emil Kowalski 공식 스킬 4종**(MIT 벤더링) — 설계 시 `emil-design-eng`(UI 폴리시 철학)·`apple-design`(스프링/제스처 물리 모션), 모호한 모션 요구는 `animation-vocabulary` 로 정확한 용어 변환 후 구현.
+3. **모션 토큰**: `references/design-dna.md` **MOTION DNA** 섹션에서 선택 아키타입의 모션 행을 통째로 주입 (추상 지시 금지).
+4. **구현**: 스크롤/타임라인/마이크로인터랙션은 **GSAP 공식 스킬**(gsap-core·gsap-scrolltrigger·gsap-timeline·gsap-react 등, 벤더링됨) 패턴으로. React 마이크로인터랙션(진입/퇴장·hover·모달)은 emil 계열 easing/duration 기준(진입 ease-out 200-300ms·퇴장 ease-in 150-200ms) 우선. `prefers-reduced-motion` 분기 필수.
+5. **채점**: 모션은 S2 스크린샷으로 못 본다 — Playwright 로 스크롤 중간 지점 2~3컷 추가 캡처하거나 browse 데몬으로 실제 스크롤해 확인 후 S3 채점에 반영. **모션 코드 자체는 `review-animations` 스킬(STANDARDS.md 크래프트 기준)로 보조 채점** — Gate-T 의 모션판.
 
 ### S2. RENDER & SEE — 결과를 실제로 본다 (핵심)
 HTML/UI는 반드시 렌더해서 스크린샷을 **Read 로 본다**. 안 보면 자기비평 불가.

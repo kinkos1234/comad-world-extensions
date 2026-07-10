@@ -169,7 +169,7 @@
 **즉시탈락 (motion anti-slop):**
 - 모든 섹션 동일한 fade-in-up 반복 (PowerPoint 냄새) · bounce 남발 · 스크롤 하이재킹(휠 강탈) · 3초+ 로딩 인트로 · 커서 팔로워 장식(브랜드 근거 없이) · AOS 기본값 티 나는 균일 duration.
 
-**채점**: 모션 있는 산출물은 taste-rubric 6축 중 "차별성"·"신뢰감" 축에서 모션 품질을 함께 평가 — 모션이 orchestrated 면 가점, scattered 면 감점.
+**채점**: 모션 있는 산출물은 taste-rubric 6축 중 "차별성"·"신뢰감" 축에서 모션 품질을 함께 평가 — 모션이 orchestrated 면 가점, scattered 면 감점. 모션 **코드** 리뷰는 `review-animations` 스킬(Emil Kowalski STANDARDS, 벤더링됨)로 보조 — 절제·속도·"언제 애니메이션하지 않을지" 기준.
 
 ---
 
