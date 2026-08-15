@@ -37,7 +37,10 @@ PATTERNS: list[tuple[str, str]] = [
     (r"\brm\s+-[rRfFd]+\s+\$HOME", "rm -rf $HOME"),
     (r"\brm\s+-[rRfFd]+\s+\.\.?" + _END, "rm -rf . / .."),
     (r"\bgit\s+push\s+[^;&|]*--force(\s|$)", "git push --force"),
-    (r"\bgit\s+push\s+[^;&|]*-[^\s-]*f(\s|$)", "git push -f"),
+    # 앞이 대시나 단어문자면 긴 옵션의 조각이다 — `--abbrev-ref HEAD` 의 "-ref " 가
+    # "-f" 로 잡혀 평범한 `git push origin $(git rev-parse --abbrev-ref HEAD)` 를
+    # 막았다 (2026-08-15). 오탐이 쌓이면 사람이 가드를 무시하고 그때 가드가 죽는다.
+    (r"\bgit\s+push\s+[^;&|]*(?<![-\w])-[^\s-]*f(\s|$)", "git push -f"),
     (r"\bgit\s+reset\s+--hard\s+(HEAD~|origin/|upstream/)", "git reset --hard ref"),
     (r"\bgit\s+branch\s+-D\s+(main|master|develop|production)", "git branch -D protected"),
     (r"\bgit\s+clean\s+-fd", "git clean -fd"),

@@ -180,6 +180,13 @@ def validate(data: dict, path: pathlib.Path) -> tuple[list[str], list[str], str]
         errors.append(f"profile must be one of {sorted(ALLOWED_PROFILES)} (got {data['profile']!r})")
 
     profile = detect_profile(data)
+    if "profile" not in data:
+        # 추정은 편의일 뿐 계약이 아니다 — scope 문구 한 줄에 따라 요구 수준이 통째로 바뀐다.
+        # 명시하지 않으면 "왜 이 정도 증거면 되는가"를 아무도 결정하지 않은 상태가 된다.
+        warnings.append(
+            f"profile 미기재 → '{profile}' 로 추정함. 이번 변경에 맞는 값을 명시하세요 "
+            "(SKILL.md '어떤 변경에 무엇을 고르나' 표 참조)."
+        )
 
     checks = data.get("checks")
     if not isinstance(checks, dict):
