@@ -1,0 +1,38 @@
+{
+  "schema_version": "2",
+  "profile": "smoke",
+  "generated_at": "2026-08-16T00:42:16.633584+00:00",
+  "project_root": "/Users/jhkim/Programmer/01-comad/comad-world-extensions",
+  "git_head": "eb86132",
+  "scope": "HARD 후보 5건 처리 — destroy-gate force 변형 차단(①) · 게이트 회귀 테스트 pre-push 편입(②) · qa-evidence 7일 만료(④) · 반응형 실렌더 체크 설계(③) · sync 빈값 훅 기각(⑤). 가드/검증기 변경이며 런타임·의존성 변경 없음.",
+  "verdict": "PASS",
+  "checks": {
+    "gate_pattern_regression": {
+      "status": "PASS",
+      "how": "tests/test-destroy-gate-patterns.py 를 레포 사본(DESTROY_GATE_PATH)에 대해 실행 — 23/23 (오탐 9 · 차단 14). --force-with-lease·--force-if-includes·값 붙은 형태를 새로 차단하고, 어제 오탐이던 --abbrev-ref 케이스는 계속 통과."
+    },
+    "gate_fail_case": {
+      "status": "PASS",
+      "how": "패턴을 확장 전으로 되돌려 테스트가 exit 1 로 잡는지 확인 후 원복. 통과만 보고 내보내면 무력화된 가드를 배포하게 된다."
+    },
+    "prepush_scope": {
+      "status": "PASS",
+      "how": "pre-push 는 hooks/pre-tool-use/ 가 이번 푸시 범위에 포함될 때만 실행(stdin 의 ref 범위 diff). 무관한 푸시에는 조용히 통과 — 노이즈가 쌓이면 게이트가 무시된다."
+    },
+    "evidence_expiry": {
+      "status": "PASS",
+      "how": "generated_at 113일 전 파일 → ERROR(FAIL), 당일 파일 → PASS 확인. git_head 불일치는 정상 흐름에서도 흔해 ERROR 로 만들지 않았다."
+    },
+    "syntax": {
+      "status": "PASS",
+      "how": "bash -n(pre-push) · ast.parse(validator·destroy-gate) 구문 검사."
+    }
+  },
+  "inventory": {
+    "decisions_resolved": 5,
+    "files_changed": 6,
+    "tests": 23
+  },
+  "artifacts": [],
+  "notes": "결정 큐 5건 전부 해소(채택 2 · 조건부 1 · 대안 1 · 기각 1). ③ 반응형 실렌더 체크는 docs/responsive-render-check.md 에 설계만 두고 구현은 미착수 — 승인 범위가 '설계'였다. ⑤ 는 훅을 만들지 않는 것이 결론이라 코드 변경 없음."
+}

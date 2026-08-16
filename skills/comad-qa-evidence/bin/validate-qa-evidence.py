@@ -20,6 +20,7 @@ testing — see DEEP_REQUIRED_AUDITS and the SKILL.md for the rationale.
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 import os
 import pathlib
@@ -32,6 +33,9 @@ REQUIRED_TOP = ["schema_version", "generated_at", "project_root", "git_head",
 ALLOWED_VERDICTS = {"PASS", "FAIL", "PARTIAL", "PENDING"}
 ALLOWED_CHECK_STATUSES = {"PASS", "FAIL", "SKIP", "N/A"}
 ALLOWED_PROFILES = {"smoke", "deep"}
+
+# 증거 유효기간(일). 넘으면 ERROR — "이번 푸시의 증거"라는 전제가 깨진다.
+EVIDENCE_MAX_AGE_DAYS = int(os.environ.get("COMAD_QA_EVIDENCE_MAX_AGE_DAYS", "7"))
 
 # R2 — adversarial review (second_opinion) wiring.
 # A substantial change should carry an adversarial review verdict. The check is
@@ -375,6 +379,30 @@ def validate(data: dict, path: pathlib.Path) -> tuple[list[str], list[str], str]
                     warnings.append(f"git_head={head} but current HEAD={current} (evidence may be stale)")
         except Exception:
             pass
+
+    # 증거 나이 — **이번 푸시의 증거인가**를 실제로 판정하는 건 시각이지 해시 일치가 아니다.
+    # git_head 불일치는 정상 흐름에서도 흔하다(증거를 쓰고 그 다음 커밋하면 HEAD 가 움직인다).
+    # 그걸 ERROR 로 만들면 매번 실패하는 게이트가 되고, 매번 실패하는 게이트는 무시된다.
+    # 반면 몇 달 묵은 파일이 smoke+PASS 로 남아 있으면 **무증거 푸시가 게이트를 통과**한다 —
+    # 막히는 것보다 이쪽이 훨씬 나쁘다 (comad-world-extensions eb86132 에서 실제로 목격).
+    # 그래서 나이로 자른다. (결정 20260816T002958, 사용자 승인 2026-08-16: 7일)
+    gen = data.get("generated_at")
+    if gen:
+        try:
+            ts = dt.datetime.fromisoformat(str(gen).replace("Z", "+00:00"))
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=dt.timezone.utc)
+            age_days = (dt.datetime.now(dt.timezone.utc) - ts).total_seconds() / 86400
+            if age_days > EVIDENCE_MAX_AGE_DAYS:
+                errors.append(
+                    f"generated_at 이 {age_days:.0f}일 전입니다 (상한 {EVIDENCE_MAX_AGE_DAYS}일) — "
+                    "이 증거는 이번 푸시의 것이 아닙니다. 이번 변경 범위로 다시 쓰세요 "
+                    "(init-qa-evidence.py 로 새로 만들고 profile 을 명시)."
+                )
+            elif age_days > EVIDENCE_MAX_AGE_DAYS / 2:
+                warnings.append(f"generated_at 이 {age_days:.0f}일 전 — 곧 만료됩니다(상한 {EVIDENCE_MAX_AGE_DAYS}일).")
+        except Exception:
+            warnings.append(f"generated_at 파싱 실패: {gen!r}")
 
     return errors, warnings, profile
 

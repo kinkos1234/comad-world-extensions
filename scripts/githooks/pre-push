@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# comad-world-extensions pre-push — 가드의 가드.
+#
+# 왜: 부분문자열을 동일성으로 쓴 판정이 4회 반복됐고(one-k-web URL 파싱 · select-shop-kit
+# 'code'→zipcode · mask_pii · destroy-gate 의 '-ref '→'-f'), 그중 마지막은 **정상 push 를
+# 막았다**. 오탐이 쌓이면 사람이 가드를 통째로 무시하고, 그 순간 가드가 죽는다.
+# 그래서 게이트 패턴을 건드리는 푸시에서는 양방향 회귀 테스트를 강제한다.
+#
+# 범위를 좁힌 이유: 모든 push 에서 돌리면 무관한 작업에 노이즈가 쌓인다 —
+# 그것 자체가 우리가 막으려는 실패 모드다 (rules/guard-scope-discipline).
+# 따라서 hooks/pre-tool-use/ 가 이번 푸시에 포함될 때만 실행한다.
+#
+# 설치: git config core.hooksPath scripts/githooks
+# 우회: git push --no-verify (또는 COMAD_SKIP_GATE_TESTS=1)
+set -uo pipefail
+
+[ "${COMAD_SKIP_GATE_TESTS:-0}" = "1" ] && { echo "pre-push: gate tests skipped (COMAD_SKIP_GATE_TESTS=1)"; exit 0; }
+
+ROOT="$(git rev-parse --show-toplevel)"
+TEST="$ROOT/tests/test-destroy-gate-patterns.py"
+[ -f "$TEST" ] || exit 0
+
+# 이번 푸시에 포함되는 커밋 범위에서 변경 파일을 모은다 (stdin: <local ref> <local sha> <remote ref> <remote sha>).
+changed=""
+while read -r _lref lsha _rref rsha; do
+  [ "$lsha" = "0000000000000000000000000000000000000000" ] && continue   # 브랜치 삭제
+  if [ "$rsha" = "0000000000000000000000000000000000000000" ]; then
+    range="$lsha"                                    # 신규 브랜치 → 마지막 커밋만 본다
+    changed="$changed$(git show --name-only --format= "$range" 2>/dev/null)"
+  else
+    changed="$changed$(git diff --name-only "$rsha" "$lsha" 2>/dev/null)"
+  fi
+  changed="$changed
+"
+done
+
+# stdin 이 비어 있으면(수동 실행 등) 마지막 커밋 기준으로 판단.
+[ -z "${changed//[[:space:]]/}" ] && changed="$(git show --name-only --format= HEAD 2>/dev/null)"
+
+if ! printf '%s\n' "$changed" | grep -q '^hooks/pre-tool-use/'; then
+  exit 0    # 게이트 패턴과 무관한 푸시 — 조용히 통과
+fi
+
+echo "pre-push: hooks/pre-tool-use 변경 감지 → destroy-gate 패턴 회귀 테스트"
+DESTROY_GATE_PATH="$ROOT/hooks/pre-tool-use/destroy-gate.py" python3 "$TEST" || {
+  cat <<MSG
+
+⛔ destroy-gate 패턴 회귀 테스트 실패 — 푸시를 막습니다.
+   게이트를 좁히다 진짜 케이스를 놓쳤거나, 넓히다 정상 명령을 막게 됐습니다.
+   둘 다 같은 크기의 실패입니다. tests/test-destroy-gate-patterns.py 의 실패 항목을 보세요.
+   (테스트가 검사한 대상: $ROOT/hooks/pre-tool-use/destroy-gate.py)
+   우회: COMAD_SKIP_GATE_TESTS=1 git push  또는  git push --no-verify
+
+MSG
+  exit 1
+}
+exit 0

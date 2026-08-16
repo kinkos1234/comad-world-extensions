@@ -36,7 +36,9 @@ PATTERNS: list[tuple[str, str]] = [
     (r"\brm\s+-[rRfFd]+\s+~/", "rm -rf ~/..."),
     (r"\brm\s+-[rRfFd]+\s+\$HOME", "rm -rf $HOME"),
     (r"\brm\s+-[rRfFd]+\s+\.\.?" + _END, "rm -rf . / .."),
-    (r"\bgit\s+push\s+[^;&|]*--force(\s|$)", "git push --force"),
+    # --force-with-lease · --force-if-includes 도 잡는다. 이름이 안전해 보여 무심코 쓰기 쉬운데
+    # 원격 이력을 덮는다는 사실은 --force 와 같다 (결정 20260816T002957, 사용자 승인 2026-08-16).
+    (r"\bgit\s+push\s+[^;&|]*--force[-\w]*(\s|=|$)", "git push --force"),
     # 앞이 대시나 단어문자면 긴 옵션의 조각이다 — `--abbrev-ref HEAD` 의 "-ref " 가
     # "-f" 로 잡혀 평범한 `git push origin $(git rev-parse --abbrev-ref HEAD)` 를
     # 막았다 (2026-08-15). 오탐이 쌓이면 사람이 가드를 무시하고 그때 가드가 죽는다.
