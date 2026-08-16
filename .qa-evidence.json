@@ -1,38 +1,39 @@
 {
   "schema_version": "2",
   "profile": "smoke",
-  "generated_at": "2026-08-16T00:42:16.633584+00:00",
+  "generated_at": "2026-08-16T01:02:25.095387+00:00",
   "project_root": "/Users/jhkim/Programmer/01-comad/comad-world-extensions",
-  "git_head": "eb86132",
-  "scope": "HARD 후보 5건 처리 — destroy-gate force 변형 차단(①) · 게이트 회귀 테스트 pre-push 편입(②) · qa-evidence 7일 만료(④) · 반응형 실렌더 체크 설계(③) · sync 빈값 훅 기각(⑤). 가드/검증기 변경이며 런타임·의존성 변경 없음.",
+  "git_head": "cf7915b",
+  "scope": "harness-report — second_opinion 측정 버그 수정 + 점수 v2(결과 중심) 전환. 측정·채점 로직이며 사용자 런타임 경로 변경 없음.",
   "verdict": "PASS",
   "checks": {
-    "gate_pattern_regression": {
+    "measurement_bug": {
       "status": "PASS",
-      "how": "tests/test-destroy-gate-patterns.py 를 레포 사본(DESTROY_GATE_PATH)에 대해 실행 — 23/23 (오탐 9 · 차단 14). --force-with-lease·--force-if-includes·값 붙은 형태를 새로 차단하고, 어제 오탐이던 --abbrev-ref 케이스는 계속 통과."
+      "how": "count_second_opinion 이 10초 타임아웃을 넘겨 0 을 반환하던 것 재현(3회 연속 10.13/10.00/10.00s 클립). maxdepth+prune 로 범위를 좁혀 10.13s → 0.12s, 반환값 0 → 1 로 정상화. 타임아웃 시 0 대신 예외를 올리도록 변경."
     },
-    "gate_fail_case": {
+    "score_v2": {
       "status": "PASS",
-      "how": "패턴을 확장 전으로 되돌려 테스트가 exit 1 로 잡는지 확인 후 원복. 통과만 보고 내보내면 무력화된 가드를 배포하게 된다."
+      "how": "측정 버그 수정 후 v1 점수가 100.0(5축 전부 만점)임을 확인 — 변별력 상실을 실측으로 확인하고 결과 중심 v2 로 전환. 현재 v2=38.0 (근거없는주장 24건→8.0/40 · fix_ratio 0.750→0/30 · ci_first_pass 0.986→30/30)."
     },
-    "prepush_scope": {
+    "band_function": {
       "status": "PASS",
-      "how": "pre-push 는 hooks/pre-tool-use/ 가 이번 푸시 범위에 포함될 때만 실행(stdin 의 ref 범위 diff). 무관한 푸시에는 조용히 통과 — 노이즈가 쌓이면 게이트가 무시된다."
+      "how": "_band 경계 검증 — fix_ratio 0.20→30 · 0.40→15 · 0.75→0 / ci 0.986→30 · 0.80→12. 낮을수록 좋음·높을수록 좋음 양방향 모두 확인."
     },
-    "evidence_expiry": {
+    "history_continuity": {
       "status": "PASS",
-      "how": "generated_at 113일 전 파일 → ERROR(FAIL), 당일 파일 → PASS 확인. git_head 불일치는 정상 흐름에서도 흔해 ERROR 로 만들지 않았다."
+      "how": "기존 4,525행 추세를 끊지 않도록 v1 점수를 score_v1 컬럼에 계속 기록. v1→v2 전환 행에서 척도 변경을 회귀로 오판하지 않게 회귀 판정을 건너뛰도록 처리(종료코드 0 확인)."
     },
-    "syntax": {
+    "row_write": {
       "status": "PASS",
-      "how": "bash -n(pre-push) · ast.parse(validator·destroy-gate) 구문 검사."
+      "how": "실제 CLI 실행으로 results.tsv 에 행이 기록되는 것과 신규 컬럼(unbacked_claims·score_v1·health)이 정상 채워지는 것 확인."
     }
   },
   "inventory": {
-    "decisions_resolved": 5,
-    "files_changed": 6,
-    "tests": 23
+    "files_changed": 1,
+    "axes_v1": 5,
+    "axes_v2": 3,
+    "rows_history": 4525
   },
   "artifacts": [],
-  "notes": "결정 큐 5건 전부 해소(채택 2 · 조건부 1 · 대안 1 · 기각 1). ③ 반응형 실렌더 체크는 docs/responsive-render-check.md 에 설계만 두고 구현은 미착수 — 승인 범위가 '설계'였다. ⑤ 는 훅을 만들지 않는 것이 결론이라 코드 변경 없음."
+  "notes": "활동량 3축(hard·pending·evolve)은 점수에서 내리고 health() pass/fail 로 분리했다 — 멈추면 그건 점수가 아니라 장애다. 임계·가중치(V2_BANDS)는 조정 가능한 판단값이며 2026-08-16 실측을 근거로 잡았다. 재발 지표는 처음에 '최근 30일 신규 Seen>=2' 로 잡았다가, 주간 자가학습의 일괄 승격(하루 15건)에 흔들려 계기로 못 쓴다고 판단해 per-incident 로그(claim-done·numeric-claim·premature-completion) 기반으로 교체했다."
 }
